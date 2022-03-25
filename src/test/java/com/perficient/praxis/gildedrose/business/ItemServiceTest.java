@@ -61,6 +61,44 @@ public class ItemServiceTest {
         assertEquals(item, itemCreated);
     }
 
+    @Test
+    /**
+     * GIVEN a valid id item in the database and a item with the new data
+     * WHEN createItem method is called
+     * THEN the service should update the item and return this
+     */
+    public void testUpdateItemSuccess(){
+
+        var item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
+        when(itemRepository.findById(anyInt())).thenReturn(Optional.of(item));
+        when(itemRepository.save(any())).thenReturn(item);
+
+        Item itemFound = itemService.findById(0);
+        assertEquals(item, itemFound);
+
+        Item itemUpdated = itemService.updateItem(0,item);
+        assertEquals(item, itemUpdated);
+    }
+
+    @Test
+    /**
+     * GIVEN a item list in the database
+     * WHEN listItems method is called
+     * THEN the service should list the items in the database
+     */
+    public void testListItems(){
+
+        var normal_item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
+        var tickets_item = new Item(0, "Jumbo Concierto", 5, 45, Item.Type.TICKETS);
+
+        when(itemRepository.findAll()).thenReturn(List.of(normal_item,tickets_item));
+
+        List<Item> itemsListed = itemService.listItems();
+
+        assertEquals(normal_item, itemsListed.get(0));
+        assertEquals(tickets_item, itemsListed.get(1));
+        verify(itemRepository,times(1)).findAll();
+    }
 
     @Test
     /**
@@ -83,6 +121,7 @@ public class ItemServiceTest {
         assertEquals(Item.Type.NORMAL, itemsUpdated.get(0).type);
         verify(itemRepository,times(1)).save(any());
     }
+
     @Test
     /**
      * GIVEN a valid tickets type item in the database with sellIn value < 6 and quality <50
