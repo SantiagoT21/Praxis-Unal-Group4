@@ -95,4 +95,87 @@ public class ItemService {
         return itemRepository.findById(id).orElseThrow(
                 ()-> new ResourceNotFoundException(""));
     }
+
+
+    //-------------------------------------------------------------------------------------------
+    public Item degradeQuality(Item item) {
+        if (item.quality > 0){
+            item.quality = item.quality - 1;
+        }
+        return item;
+    }
+
+    public Item upgradeQuality(Item item) {
+        if (item.quality < 50){
+            item.quality = item.quality + 1;
+        }
+        return item;
+    }
+
+    public Item updateBeforeExpired(Item item) {
+            if(isNormal(item)){
+                return  degradeQuality(item);
+            }
+            if(isAged(item)){
+                return upgradeQuality(item);
+            }
+            if(isTickets(item)){
+                //question
+                item = upgradeQuality(item);
+                if(item.sellIn < 11){
+                    item = upgradeQuality(item);
+                }
+                if(item.sellIn < 6){
+                    item = upgradeQuality(item);
+                }
+            }
+            else return item;
+    }
+
+    public Item updateAfterExpired(Item item) {
+        if (item.sellIn < 0){
+            if(isNormal(item)){
+               return  degradeQuality(item);
+            }
+            if(isAged(item)){
+                return upgradeQuality(item);
+            }
+            if(isTickets(item)){
+                //question
+                item.quality = 0;
+                return item;
+            }
+            else return item;
+        }
+            return item;
+    }
+
+    //-------------------------------------------------------------------------------------------
+    public boolean isNormal(Item item) {
+        if (item.type.equals(Item.Type.NORMAL)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean isAged(Item item) {
+        if (item.type.equals(Item.Type.AGED)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean isTickets(Item item) {
+        if (item.type.equals(Item.Type.TICKETS)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 }
