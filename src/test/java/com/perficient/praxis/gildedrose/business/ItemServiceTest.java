@@ -48,6 +48,60 @@ public class ItemServiceTest {
 
     @Test
     /**
+     * GIVEN a valid item in the database
+     * WHEN createItem method is called
+     * THEN the service should create the item and return this
+     */
+    public void testCreateItemSuccess(){
+
+        var item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
+        when(itemRepository.save(any())).thenReturn(item);
+
+        Item itemCreated = itemService.createItem(item);
+        assertEquals(item, itemCreated);
+    }
+
+    @Test
+    /**
+     * GIVEN a valid id item in the database and a item with the new data
+     * WHEN createItem method is called
+     * THEN the service should update the item and return this
+     */
+    public void testUpdateItemSuccess(){
+
+        var item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
+        when(itemRepository.findById(anyInt())).thenReturn(Optional.of(item));
+        when(itemRepository.save(any())).thenReturn(item);
+
+        Item itemFound = itemService.findById(0);
+        assertEquals(item, itemFound);
+
+        Item itemUpdated = itemService.updateItem(0,item);
+        assertEquals(item, itemUpdated);
+    }
+
+    @Test
+    /**
+     * GIVEN a item list in the database
+     * WHEN listItems method is called
+     * THEN the service should list the items in the database
+     */
+    public void testListItems(){
+
+        var normal_item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
+        var tickets_item = new Item(0, "Jumbo Concierto", 5, 45, Item.Type.TICKETS);
+
+        when(itemRepository.findAll()).thenReturn(List.of(normal_item,tickets_item));
+
+        List<Item> itemsListed = itemService.listItems();
+
+        assertEquals(normal_item, itemsListed.get(0));
+        assertEquals(tickets_item, itemsListed.get(1));
+        verify(itemRepository,times(1)).findAll();
+    }
+
+    @Test
+    /**
      * GIVEN a valid normal type item in the database
      * WHEN updateQuality method is called
      * THEN the service should update the quality and sellIn values,
@@ -68,12 +122,264 @@ public class ItemServiceTest {
         verify(itemRepository,times(1)).save(any());
     }
 
+    @Test
+    /**
+     * GIVEN a valid tickets type item in the database with sellIn value < 6 and quality <50
+     * WHEN updateQuality method is called
+     * THEN the service should update the quality and sellIn values,
+     * the quality will be increased by 3, and the sellin will decreased by 1
+     */
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder6(){
 
+        var item = new Item(0, "Jumbo Concierto", 5, 45, Item.Type.TICKETS);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
 
+        List<Item> itemsUpdated = itemService.updateQuality();
 
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Jumbo Concierto", itemsUpdated.get(0).name);
+        assertEquals(4, itemsUpdated.get(0).sellIn);
+        assertEquals(48, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.TICKETS, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
 
+    @Test
+    /**
+     * GIVEN a valid tickets type item in the database with sellIn value > 11 and quality <50
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn values,
+     * the sellIn will decrease by 1
+     */
+    public void testUpdateQualityOfTicketsTypeItemSellInOver11(){
 
+        var item = new Item(0, "Jumbo Concierto", 15, 70, Item.Type.TICKETS);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
 
+        List<Item> itemsUpdated = itemService.updateQuality();
 
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Jumbo Concierto", itemsUpdated.get(0).name);
+        assertEquals(14, itemsUpdated.get(0).sellIn);
+        assertEquals(70, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.TICKETS, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid tickets type item in the database with Negative sellIn and positive quality value
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn values,
+     * the sellIn will decrease by 1
+     */
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder0(){
+
+        var item = new Item(0, "Jumbo Concierto", -1, 45, Item.Type.TICKETS);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Jumbo Concierto", itemsUpdated.get(0).name);
+        assertEquals(-2, itemsUpdated.get(0).sellIn);
+        assertEquals(0, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.TICKETS, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Normal type item in the database with Negative sellIn and positive quality value
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn and quality values,
+     * the sellIn will decrease by 1, and the quality will decrease by 2 (double)
+     */
+    public void testUpdateQualityOfNormalTypeItemSellInUnder0(){
+
+        var item = new Item(0, "Oreo", -1, 45, Item.Type.NORMAL);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Oreo", itemsUpdated.get(0).name);
+        assertEquals(-2, itemsUpdated.get(0).sellIn);
+        assertEquals(43, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.NORMAL, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Aged type item in the database with Negative sellIn and quality under 50
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn and quality values,
+     * the sellIn will decrease by 1, and the quality will increase by 2
+     */
+    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityUnder50(){
+
+        var item = new Item(0, "Wine Black Cat", 0, 45, Item.Type.AGED);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Wine Black Cat", itemsUpdated.get(0).name);
+        assertEquals(-1, itemsUpdated.get(0).sellIn);
+        assertEquals(47, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.AGED, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Aged type item in the database with Negative sellIn and quality over 50
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn and quality values,
+     * the sellIn will decrease by 1
+     */
+    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityOver50(){
+
+        var item = new Item(0, "Wine Black Cat", 0, 65, Item.Type.AGED);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Wine Black Cat", itemsUpdated.get(0).name);
+        assertEquals(-1, itemsUpdated.get(0).sellIn);
+        assertEquals(65, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.AGED, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Legendary type item in the database with quality 0
+     * WHEN updateQuality method is called
+     * THEN the service shouldn't update the sellIn and quality values
+     */
+    public void testUpdateQualityOfLegendaryTypeItemQuality0(){
+
+        var item = new Item(0, "Gioconda", 11, 0, Item.Type.LEGENDARY);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Gioconda", itemsUpdated.get(0).name);
+        assertEquals(11, itemsUpdated.get(0).sellIn);
+        assertEquals(0, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.LEGENDARY, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Legendary type item in the database
+     * WHEN updateQuality method is called
+     * THEN the service shouldn't update the sellIn and quality values
+     */
+    public void testUpdateQualityOfLegendaryTypeItem(){
+
+        var item = new Item(0, "Gioconda", 11, 50, Item.Type.LEGENDARY);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Gioconda", itemsUpdated.get(0).name);
+        assertEquals(11, itemsUpdated.get(0).sellIn);
+        assertEquals(50, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.LEGENDARY, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid tickets type item in the database with sellIn over 11 and positive quality under 50
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn values,
+     * the sellIn will decrease by 1, the quality will increase by 1
+     */
+    public void testUpdateQualityOfTicketsTypeItemSellInOver11QualityUnder50(){
+
+        var item = new Item(0, "Jumbo Concierto", 12, 45, Item.Type.TICKETS);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Jumbo Concierto", itemsUpdated.get(0).name);
+        assertEquals(11, itemsUpdated.get(0).sellIn);
+        assertEquals(46, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.TICKETS, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid tickets type item in the database with sellIn under 6 and quality 49
+     * WHEN updateQuality method is called
+     * THEN the service should update the sellIn values,
+     * the sellIn will decrease by 1, the quality will increase by 1
+     */
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder6QualityOver50(){
+
+        var item = new Item(0, "Jumbo Concierto", 5, 49, Item.Type.TICKETS);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Jumbo Concierto", itemsUpdated.get(0).name);
+        assertEquals(4, itemsUpdated.get(0).sellIn);
+        assertEquals(50, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.TICKETS, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Legendary type item in the database with sellIn under 0 and quality 0
+     * WHEN updateQuality method is called
+     * THEN the service shouldn't update the sellIn and quality values
+     */
+    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0Quality0(){
+
+        var item = new Item(0, "Gioconda", -1, 0, Item.Type.LEGENDARY);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Gioconda", itemsUpdated.get(0).name);
+        assertEquals(-1, itemsUpdated.get(0).sellIn);
+        assertEquals(0, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.LEGENDARY, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
+     * GIVEN a valid Legendary type item in the database with sellIn under 0 and quality over 0
+     * WHEN updateQuality method is called
+     * THEN the service shouldn't update the sellIn and quality values
+     */
+    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0QualityOver0(){
+
+        var item = new Item(0, "Gioconda", -1, 10, Item.Type.LEGENDARY);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Gioconda", itemsUpdated.get(0).name);
+        assertEquals(-1, itemsUpdated.get(0).sellIn);
+        assertEquals(10, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.LEGENDARY, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
 
 }
