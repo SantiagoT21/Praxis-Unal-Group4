@@ -25,55 +25,18 @@ public class ItemService {
         var items = itemsList.toArray(new Item[itemsList.size()]);
 
         for (int i = 0; i < items.length; i++) {
-            if (!items[i].type.equals(Item.Type.AGED)
-                    && !items[i].type.equals(Item.Type.TICKETS)) {
-                if (items[i].quality > 0) {
-                    if (!items[i].type.equals(Item.Type.LEGENDARY)) {
-                        items[i].quality = items[i].quality - 1;
-                    }
-                }
-            } else {
-                if (items[i].quality < 50) {
-                    items[i].quality = items[i].quality + 1;
 
-                    if (items[i].type.equals(Item.Type.TICKETS)) {
-                        if (items[i].sellIn < 11) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
+            Item currentItem = items[i];
 
-                        if (items[i].sellIn < 6) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-                    }
-                }
+            currentItem = updateBeforeExpired(currentItem);
+
+            if (!currentItem.type.equals(Item.Type.LEGENDARY)) {
+                currentItem.sellIn = items[i].sellIn - 1;
             }
 
-            if (!items[i].type.equals(Item.Type.LEGENDARY)) {
-                items[i].sellIn = items[i].sellIn - 1;
-            }
+            currentItem = updateAfterExpired(currentItem);
 
-            if (items[i].sellIn < 0) {
-                if (!items[i].type.equals(Item.Type.AGED)) {
-                    if (!items[i].type.equals(Item.Type.TICKETS)) {
-                        if (items[i].quality > 0) {
-                            if (!items[i].type.equals(Item.Type.LEGENDARY)) {
-                                items[i].quality = items[i].quality - 1;
-                            }
-                        }
-                    } else {
-                        items[i].quality = items[i].quality - items[i].quality;
-                    }
-                } else {
-                    if (items[i].quality < 50) {
-                        items[i].quality = items[i].quality + 1;
-                    }
-                }
-            }
-            itemRepository.save(items[i]);
+            itemRepository.save(currentItem);
         }
         return Arrays.asList(items);
     }
@@ -100,15 +63,17 @@ public class ItemService {
 
     //-------------------------------------------------------------------------------------------
     public Item degradeQuality(Item item) {
-        if (item.quality > 0){
-            item.quality = item.quality - 1;
+        int currentQuality = item.quality;
+        if (currentQuality > 0){
+            item.quality = currentQuality - 1;
         }
         return item;
     }
 
     public Item upgradeQuality(Item item) {
-        if (item.quality < 50){
-            item.quality = item.quality + 1;
+        int currentQuality = item.quality;
+        if (currentQuality < 50){
+            item.quality = currentQuality + 1;
         }
         return item;
     }
@@ -122,19 +87,24 @@ public class ItemService {
             }
             if(isTickets(item)){
                 //question
+                int daysToSell = item.sellIn;
                 item = upgradeQuality(item);
-                if(item.sellIn < 11){
+                if(daysToSell < 11){
                     item = upgradeQuality(item);
                 }
-                if(item.sellIn < 6){
+                if(daysToSell < 6){
                     item = upgradeQuality(item);
                 }
+                return item;
             }
-            else return item;
+            else{
+                return item;
+            }
     }
 
     public Item updateAfterExpired(Item item) {
-        if (item.sellIn < 0){
+        int daysToSell = item.sellIn;
+        if (daysToSell < 0){
             if(isNormal(item)){
                return  degradeQuality(item);
             }
@@ -142,7 +112,6 @@ public class ItemService {
                 return upgradeQuality(item);
             }
             if(isTickets(item)){
-                //question
                 item.quality = 0;
                 return item;
             }
