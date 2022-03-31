@@ -90,11 +90,11 @@ public class ItemService {
         return qualityToUpdate;
     }
 
-    public int updateTicketExpiredQuality(){
-        return minimumQuality;
+    public int decreaseSellIn(Item item){
+        return item.sellIn = item.sellIn - 1;
     }
 
-    public int updateTicketQuality(Item item, boolean isExpired) throws Exception {
+    public int updateTicketsQuality(Item item, boolean isExpired) throws Exception {
         int daysForSellUpdate = item.sellIn;
         int qualityToUpdate = item.quality;
 
@@ -110,7 +110,7 @@ public class ItemService {
             qualityToUpdate = increaseQuality(qualityToUpdate);
         }
         if(isExpired){
-            qualityToUpdate = updateTicketExpiredQuality();
+            qualityToUpdate = minimumQuality;
         }
 
         return qualityToUpdate;
@@ -138,10 +138,6 @@ public class ItemService {
         return qualityToUpdate;
     }
 
-    public int decreaseSellIn(Item item){
-        return item.sellIn = item.sellIn - 1;
-    }
-
     public Item itemUpdated(Item item, boolean isExpired) throws Exception {
         switch (item.type){
             case NORMAL -> {
@@ -153,7 +149,7 @@ public class ItemService {
                 item.sellIn = decreaseSellIn(item);
             }
             case TICKETS -> {
-                item.quality =  updateTicketQuality(item,isExpired);
+                item.quality =  updateTicketsQuality(item,isExpired);
                 item.sellIn = decreaseSellIn(item);
             }
         }
