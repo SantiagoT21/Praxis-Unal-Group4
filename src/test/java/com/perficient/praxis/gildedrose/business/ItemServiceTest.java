@@ -107,7 +107,7 @@ public class ItemServiceTest {
      * THEN the service should update the quality and sellIn values,
      * both will be decreased by 1
      */
-    public void testUpdateQualityOfNormalTypeItem(){
+    public void testUpdateQualityOfNormalTypeItem() throws Exception {
 
         var item = new Item(0, "Oreo", 10, 30, Item.Type.NORMAL);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -124,12 +124,34 @@ public class ItemServiceTest {
 
     @Test
     /**
+     * GIVEN a valid normal type item in the database
+     * WHEN updateQuality method is called
+     * THEN the service should update the quality and sellIn values,
+     * sellin will be decreased by 1 and quality will be decreased by 2
+     */
+    public void testUpdateQualityOfNormalTypeItemSellinUnder0() throws Exception {
+
+        var item = new Item(0, "Oreo", -1, 1, Item.Type.NORMAL);
+        when(itemRepository.findAll()).thenReturn(List.of(item));
+
+        List<Item> itemsUpdated = itemService.updateQuality();
+
+        assertEquals(0, itemsUpdated.get(0).getId());
+        assertEquals("Oreo", itemsUpdated.get(0).name);
+        assertEquals(-2, itemsUpdated.get(0).sellIn);
+        assertEquals(0, itemsUpdated.get(0).quality);
+        assertEquals(Item.Type.NORMAL, itemsUpdated.get(0).type);
+        verify(itemRepository,times(1)).save(any());
+    }
+
+    @Test
+    /**
      * GIVEN a valid tickets type item in the database with sellIn value < 6 and quality <50
      * WHEN updateQuality method is called
      * THEN the service should update the quality and sellIn values,
      * the quality will be increased by 3, and the sellin will decreased by 1
      */
-    public void testUpdateQualityOfTicketsTypeItemSellInUnder6(){
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder6() throws Exception {
 
         var item = new Item(0, "Jumbo Concierto", 5, 45, Item.Type.TICKETS);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -151,7 +173,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn values,
      * the sellIn will decrease by 1
      */
-    public void testUpdateQualityOfTicketsTypeItemSellInOver11(){
+    public void testUpdateQualityOfTicketsTypeItemSellInOver11() throws Exception {
 
         var item = new Item(0, "Jumbo Concierto", 15, 70, Item.Type.TICKETS);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -173,7 +195,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn values,
      * the sellIn will decrease by 1
      */
-    public void testUpdateQualityOfTicketsTypeItemSellInUnder0(){
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder0() throws Exception {
 
         var item = new Item(0, "Jumbo Concierto", -1, 45, Item.Type.TICKETS);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -195,7 +217,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn and quality values,
      * the sellIn will decrease by 1, and the quality will decrease by 2 (double)
      */
-    public void testUpdateQualityOfNormalTypeItemSellInUnder0(){
+    public void testUpdateQualityOfNormalTypeItemSellInUnder0() throws Exception {
 
         var item = new Item(0, "Oreo", -1, 45, Item.Type.NORMAL);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -217,16 +239,16 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn and quality values,
      * the sellIn will decrease by 1, and the quality will increase by 2
      */
-    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityUnder50(){
+    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityUnder50() throws Exception {
 
-        var item = new Item(0, "Wine Black Cat", 0, 45, Item.Type.AGED);
+        var item = new Item(0, "Wine Black Cat", -1, 45, Item.Type.AGED);
         when(itemRepository.findAll()).thenReturn(List.of(item));
 
         List<Item> itemsUpdated = itemService.updateQuality();
 
         assertEquals(0, itemsUpdated.get(0).getId());
         assertEquals("Wine Black Cat", itemsUpdated.get(0).name);
-        assertEquals(-1, itemsUpdated.get(0).sellIn);
+        assertEquals(-2, itemsUpdated.get(0).sellIn);
         assertEquals(47, itemsUpdated.get(0).quality);
         assertEquals(Item.Type.AGED, itemsUpdated.get(0).type);
         verify(itemRepository,times(1)).save(any());
@@ -239,7 +261,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn and quality values,
      * the sellIn will decrease by 1
      */
-    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityOver50(){
+    public void testUpdateQualityOfAgedTypeItemSellInUnder0QualityOver50() throws Exception {
 
         var item = new Item(0, "Wine Black Cat", 0, 65, Item.Type.AGED);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -260,7 +282,7 @@ public class ItemServiceTest {
      * WHEN updateQuality method is called
      * THEN the service shouldn't update the sellIn and quality values
      */
-    public void testUpdateQualityOfLegendaryTypeItemQuality0(){
+    public void testUpdateQualityOfLegendaryTypeItemQuality0() throws Exception {
 
         var item = new Item(0, "Gioconda", 11, 0, Item.Type.LEGENDARY);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -281,7 +303,7 @@ public class ItemServiceTest {
      * WHEN updateQuality method is called
      * THEN the service shouldn't update the sellIn and quality values
      */
-    public void testUpdateQualityOfLegendaryTypeItem(){
+    public void testUpdateQualityOfLegendaryTypeItem() throws Exception {
 
         var item = new Item(0, "Gioconda", 11, 50, Item.Type.LEGENDARY);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -303,7 +325,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn values,
      * the sellIn will decrease by 1, the quality will increase by 1
      */
-    public void testUpdateQualityOfTicketsTypeItemSellInOver11QualityUnder50(){
+    public void testUpdateQualityOfTicketsTypeItemSellInOver11QualityUnder50() throws Exception {
 
         var item = new Item(0, "Jumbo Concierto", 12, 45, Item.Type.TICKETS);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -325,7 +347,7 @@ public class ItemServiceTest {
      * THEN the service should update the sellIn values,
      * the sellIn will decrease by 1, the quality will increase by 1
      */
-    public void testUpdateQualityOfTicketsTypeItemSellInUnder6QualityOver50(){
+    public void testUpdateQualityOfTicketsTypeItemSellInUnder6QualityOver50() throws Exception {
 
         var item = new Item(0, "Jumbo Concierto", 5, 49, Item.Type.TICKETS);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -346,7 +368,7 @@ public class ItemServiceTest {
      * WHEN updateQuality method is called
      * THEN the service shouldn't update the sellIn and quality values
      */
-    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0Quality0(){
+    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0Quality0() throws Exception {
 
         var item = new Item(0, "Gioconda", -1, 0, Item.Type.LEGENDARY);
         when(itemRepository.findAll()).thenReturn(List.of(item));
@@ -367,7 +389,7 @@ public class ItemServiceTest {
      * WHEN updateQuality method is called
      * THEN the service shouldn't update the sellIn and quality values
      */
-    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0QualityOver0(){
+    public void testUpdateQualityOfLegendaryTypeItemSellInUnder0QualityOver0() throws Exception {
 
         var item = new Item(0, "Gioconda", -1, 10, Item.Type.LEGENDARY);
         when(itemRepository.findAll()).thenReturn(List.of(item));

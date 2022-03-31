@@ -13,6 +13,10 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
 
+    private int maximumQuality = 50;
+    private int minimumQuality = 0;
+    private int expiredDay = 0;
+
     Item[] items;
 
     public ItemService(ItemRepository itemRepository, Item[] items) {
@@ -20,23 +24,18 @@ public class ItemService {
         this.items = items;
     }
 
-    public List<Item> updateQuality() {
+    public List<Item> updateQuality() throws Exception {
         var itemsList = itemRepository.findAll();
         var items = itemsList.toArray(new Item[itemsList.size()]);
 
-        for (int i = 0; i < items.length; i++) {
+        for (Item item : items) {
 
-            Item currentItem = items[i];
+            int daysForSellUpdate = item.sellIn;
+            boolean isExpired = daysForSellUpdate < expiredDay;
 
-            currentItem = updateBeforeExpired(currentItem);
+            item = itemUpdated(item,isExpired);
 
-            if (!currentItem.type.equals(Item.Type.LEGENDARY)) {
-                currentItem.sellIn = items[i].sellIn - 1;
-            }
-
-            currentItem = updateAfterExpired(currentItem);
-
-            itemRepository.save(currentItem);
+            itemRepository.save(item);
         }
         return Arrays.asList(items);
     }
@@ -62,90 +61,105 @@ public class ItemService {
 
 
     //-------------------------------------------------------------------------------------------
-    public Item degradeQuality(Item item) {
-        int currentQuality = item.quality;
-        if (currentQuality > 0){
-            item.quality = currentQuality - 1;
-        }
-        return item;
-    }
 
-    public Item upgradeQuality(Item item) {
-        int currentQuality = item.quality;
-        if (currentQuality < 50){
-            item.quality = currentQuality + 1;
-        }
-        return item;
-    }
-
-    public Item updateBeforeExpired(Item item) {
-            if(isNormal(item)){
-                return  degradeQuality(item);
-            }
-            if(isAged(item)){
-                return upgradeQuality(item);
-            }
-            if(isTickets(item)){
-                //question
-                int daysToSell = item.sellIn;
-                item = upgradeQuality(item);
-                if(daysToSell < 11){
-                    item = upgradeQuality(item);
-                }
-                if(daysToSell < 6){
-                    item = upgradeQuality(item);
-                }
-                return item;
+    public int increaseQuality(int qualityToUpdate) throws Exception{
+        boolean isValidQuality = qualityToUpdate<maximumQuality && qualityToUpdate>minimumQuality;
+        try{
+            if(isValidQuality){
+                qualityToUpdate ++;
             }
             else{
-                return item;
+                throw new ArithmeticException("the quality has the maximum value");
             }
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
+        }
+        return qualityToUpdate;
     }
 
-    public Item updateAfterExpired(Item item) {
-        int daysToSell = item.sellIn;
-        if (daysToSell < 0){
-            if(isNormal(item)){
-               return  degradeQuality(item);
+    public int decreaseQuality(int qualityToUpdate) throws Exception {
+        boolean isValidQuality = qualityToUpdate<maximumQuality && qualityToUpdate>minimumQuality;
+        try{
+            if(isValidQuality){
+                qualityToUpdate --;
             }
-            if(isAged(item)){
-                return upgradeQuality(item);
+            else{
+                throw new ArithmeticException("the quality has the minimum value");
             }
-            if(isTickets(item)){
-                item.quality = 0;
-                return item;
-            }
-            else return item;
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
         }
-            return item;
+        return qualityToUpdate;
     }
 
-    //-------------------------------------------------------------------------------------------
-    public boolean isNormal(Item item) {
-        if (item.type.equals(Item.Type.NORMAL)){
-            return true;
-        }
-        else{
-            return false;
-        }
+    public int updateTicketExpiredQuality(){
+        return minimumQuality;
     }
 
-    public boolean isAged(Item item) {
-        if (item.type.equals(Item.Type.AGED)){
-            return true;
+    public int updateTicketQuality(Item item, boolean isExpired) throws Exception {
+        int daysForSellUpdate = item.sellIn;
+        int qualityToUpdate = item.quality;
+
+        boolean isLastWeekToSellTicket = daysForSellUpdate < 6;
+        boolean isLatestTwoWeeksToSellTicket = daysForSellUpdate< 11;
+
+        qualityToUpdate = increaseQuality(qualityToUpdate);
+
+        if(isLatestTwoWeeksToSellTicket){
+            qualityToUpdate = increaseQuality(qualityToUpdate);
         }
-        else{
-            return false;
+        if(isLastWeekToSellTicket){
+            qualityToUpdate = increaseQuality(qualityToUpdate);
         }
+        if(isExpired){
+            qualityToUpdate = updateTicketExpiredQuality();
+        }
+
+        return qualityToUpdate;
     }
 
-    public boolean isTickets(Item item) {
-        if (item.type.equals(Item.Type.TICKETS)){
-            return true;
+    public int updateNormalQuality(Item item, boolean isExpired) throws Exception {
+        int qualityToUpdate = item.quality;
+
+        qualityToUpdate = decreaseQuality(qualityToUpdate);
+
+        if(isExpired){
+            qualityToUpdate = decreaseQuality(qualityToUpdate);
         }
-        else{
-            return false;
+        return qualityToUpdate;
+    }
+
+    public int updateAgedQuality(Item item, boolean isExpired) throws Exception {
+        int qualityToUpdate = item.quality;
+
+        qualityToUpdate = increaseQuality(qualityToUpdate);
+
+        if(isExpired){
+            qualityToUpdate = increaseQuality(qualityToUpdate);
         }
+        return qualityToUpdate;
+    }
+
+    public int decreaseSellIn(Item item){
+        return item.sellIn = item.sellIn - 1;
+    }
+
+    public Item itemUpdated(Item item, boolean isExpired) throws Exception {
+        switch (item.type){
+            case NORMAL -> {
+                item.quality = updateNormalQuality(item,isExpired);
+                item.sellIn = decreaseSellIn(item);
+            }
+            case AGED -> {
+                item.quality =  updateAgedQuality(item,isExpired);
+                item.sellIn = decreaseSellIn(item);
+            }
+            case TICKETS -> {
+                item.quality =  updateTicketQuality(item,isExpired);
+                item.sellIn = decreaseSellIn(item);
+            }
+        }
+        return item;
     }
 
 }
