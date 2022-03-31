@@ -60,8 +60,6 @@ public class ItemService {
     }
 
 
-    //-------------------------------------------------------------------------------------------
-
     public int increaseQuality(int qualityToUpdate) throws Exception{
         boolean isValidQuality = qualityToUpdate<maximumQuality && qualityToUpdate>minimumQuality;
         try{
