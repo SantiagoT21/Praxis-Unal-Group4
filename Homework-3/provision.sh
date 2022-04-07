@@ -2,57 +2,77 @@
 
 apt-get update
 
-echo "\n----- Installing Java 17 ------\n"
-apt-get --purge autoremove openjdk-17-jdk -y
-apt-get -y install openjdk-17-jdk
+echo "------------ Installing Java 17 ------------"
 
-echo "\n----- Installing Maven ------\n"
+if  [ ! -f '/usr/bin/java' ] ;
+	then
+	apt-get -y install openjdk-17-jdk
+	else
+	echo 'Java already exists'
+fi
 
-wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
-tar -xvf apache-maven-3.8.5-bin.tar.gz
-cp -r apache-maven-3.8.5 /opt/maven
+echo "------------ Installing Maven ------------"
 
-FILE= /etc/profile.d/maven.sh
+if [ ! -f /etc/profile.d/maven.sh ] ;
+	then
 
-if [ -f $FILE ]
+	wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
+	tar -xvf apache-maven-3.8.5-bin.tar.gz
+	cp -r apache-maven-3.8.5 /opt/maven
+
+	if ! grep -qF 'export M2_HOME=/opt/maven' /etc/profile
+    	then
+    	echo 'export M2_HOME=/opt/maven' | tee -a /etc/profile.d/maven.sh
+	fi
+
+	if ! grep -qF 'export MAVEN_HOME=/opt/maven' /etc/profile
+    	then
+    	echo 'export MAVEN_HOME=/opt/maven' | tee -a /etc/profile.d/maven.sh
+	fi
+
+	if ! grep -qF 'export PATH=${M2_HOME}/bin:${PATH}' /etc/profile
+    	then
+    	echo 'export PATH=${M2_HOME}/bin:${PATH}' | tee -a /etc/profile.d/maven.sh
+	fi
+	chmod 755 /etc/profile.d/maven.sh
+	source /etc/profile.d/maven.sh
+
+	else
+		 echo 'Maven already exists'
+fi
+
+echo "------------ Installing Git ------------"
+
+if  [ ! -f '/usr/bin/git' ] ;
 then
-   echo "$FILE existe"
+	apt-get -y install git
 else
-   cat $FILE
+	echo 'Git already exists'
 fi
 
-if ! grep -qF 'export M2_HOME=/opt/maven' /etc/profile
-    then
-    echo 'export M2_HOME=/opt/maven' | tee -a /etc/profile.d/maven.sh
+echo "------------ Installing Docker ------------"
+
+if  [ ! -f '/usr/bin/docker' ] ;
+then
+	apt-get install -y docker.io
+else
+	echo 'Docker already exists'
 fi
 
-if ! grep -qF 'export MAVEN_HOME=/opt/maven' /etc/profile
-    then
-    echo 'export MAVEN_HOME=/opt/maven' | tee -a /etc/profile.d/maven.sh
-fi
+sudo docker rm -f my-postgres
 
-if ! grep -qF 'export PATH=${M2_HOME}/bin:${PATH}' /etc/profile
-    then
-    echo 'export PATH=${M2_HOME}/bin:${PATH}' | tee -a /etc/profile.d/maven.sh
-fi
-
-chmod 755 /etc/profile.d/maven.sh
-source /etc/profile.d/maven.sh
-
-echo "\n----- Installing Git ------\n"
-apt-get --purge remove git -y
-apt-get -y install git
-
-echo "\n----- Installing Docker ------\n"
-apt-get install -y docker.io
-
-echo "\n----- Run Docker ------\n"
+echo "------------ Run Docker ------------"
 sudo docker run --name my-postgres -e POSTGRES_PASSWORD=secret -p 5433:5432 -d postgres
 
-echo "\n----- Clone Repository ------\n"
-rm -Rf Praxis-Unal-Group4
-git clone https://github.com/SantiagoT21/Praxis-Unal-Group4.git
+echo "------------ Clone Repository ------------"
 
-echo "\n----- Run Aplication------\n"
+if [ ! -d /home/vagrant/Praxis-Unal-Group4 ] ;
+	then
+	git clone https://github.com/SantiagoT21/Praxis-Unal-Group4.git
+	else
+	echo 'Repository already exists'
+fi
+
+echo "------------ Run Aplication ------------"
 cd Praxis-Unal-Group4
 mvn spring-boot:run
