@@ -17,11 +17,8 @@ public class ItemService {
     private int minimumQuality = 0;
     private int expiredDay = 0;
 
-    Item[] items;
-
-    public ItemService(ItemRepository itemRepository, Item[] items) {
+    public ItemService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
-        this.items = items;
     }
 
     public List<Item> updateQuality() throws Exception {
@@ -40,6 +37,10 @@ public class ItemService {
         return Arrays.asList(items);
     }
 
+    public void deleteById(int id) {
+        Item item = findById(id);
+        itemRepository.delete(item);
+    }
 
     public Item createItem(Item item) {
         return itemRepository.save(item);
