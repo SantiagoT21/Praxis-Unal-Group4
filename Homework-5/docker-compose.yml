@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: 'postgres'
+    ports:
+           - "5432:5432"
+    environment:
+           - POSTGRES_PASSWORD=secret
+    restart: always
+  backendserver:
+    image: 'backend'
+    ports:
+           - "8080:8080"
+    links:
+           - "db"
+    depends_on:
+           - "db"
+    environment:
+           - DB_HOST_IP=db
+  frontend:
+    image: 'frontend'
+    links:
+           - "backendserver"
+    depends_on:
+           - "backendserver"
+    environment:
+           - API_URL_IP=backendserver
+    ports:
+           - "4200:4200"
