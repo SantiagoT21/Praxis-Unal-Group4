@@ -1,6 +1,7 @@
 # BUILD
 FROM maven as backend-b
 COPY . .
+ARG DB_HOST_IP
 RUN mvn -B clean package
 
 # DEPLOY
