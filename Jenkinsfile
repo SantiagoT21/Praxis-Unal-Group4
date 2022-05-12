@@ -7,14 +7,12 @@ pipeline {
   }
   agent any
   stages {
-      stage('Obtain data base ip') {
-          steps {
-              sh '''
-              export dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)
-              '''
-          }
-      }
       stage('Building our image') {
+          steps {
+                        sh '''
+                        export dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)
+                        '''
+                    }
           steps {
               script {
                   dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=$dataBaseIp .")
