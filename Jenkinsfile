@@ -3,7 +3,7 @@ pipeline {
       registry = "santiagot1105/homework5repo:backend"
       registryCredential = 'dockerhub_id'
       dockerImage = ''
-      dataBaseIp = "${sh(script:'docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres', returnStdout: true).trim()}"
+      dataBaseIp = '''${sh(script:'docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres', returnStdout: true).trim()}'''
   }
   agent any
   stages {
