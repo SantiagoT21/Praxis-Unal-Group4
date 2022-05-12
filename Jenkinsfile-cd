@@ -4,7 +4,6 @@ pipeline {
   stages {
       stage('Docker compose Up') {
           steps {
-              sh 'echo b3679536-f864-4358-a0cb-f8fded97b795 | docker login -u santiagot1105 --password-stdin'
               sh 'docker-compose up -V'
           }
       }
