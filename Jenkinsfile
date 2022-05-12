@@ -9,11 +9,9 @@ pipeline {
   stages {
       stage('Building our image') {
           steps {
-                        sh '''
-                        export dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)
-                        '''
-                    }
-          steps {
+          sh '''
+             export dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)
+             '''
               script {
                   dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=$dataBaseIp .")
               }
