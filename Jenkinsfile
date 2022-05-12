@@ -9,7 +9,9 @@ pipeline {
   stages {
       stage('Obtain data base ip') {
           steps {
-              sh 'dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)'
+              sh '''
+              dataBaseIp=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres)
+              '''
           }
       }
       stage('Building our image') {
