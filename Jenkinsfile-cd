@@ -4,6 +4,7 @@ pipeline {
   stages {
       stage('Docker compose Up') {
           steps {
+              sh 'docker-compose rm -fsv'
               sh 'docker-compose up -V'
           }
       }
