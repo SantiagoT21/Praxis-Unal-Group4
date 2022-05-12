@@ -17,7 +17,7 @@ pipeline {
       stage('Building our image') {
           steps {
               script {
-                  dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=" + dataBaseIp)
+                  dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=" + dataBaseIp + " .")
               }
           }
       }
