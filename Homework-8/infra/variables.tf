@@ -69,3 +69,17 @@ variable "sg_tags" {
   description = "SG resource tags"
   type        = map(string)
 }
+
+variable "host_ip" {
+  type        = string
+  description = "CIDR to allow inbound t over tcp for ssh"
+}
+
+##############################################
+# Elastic IP variables
+##############################################
+
+variable "eip_tags" {
+  description = "EIP resource tags"
+  type        = map(string)
+}

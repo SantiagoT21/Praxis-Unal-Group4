@@ -21,7 +21,7 @@ resource "aws_security_group" "group4-sg" {
     from_port   = 22
     protocol    = "TCP"
     to_port     = 22
-    cidr_blocks = ["168.176.143.36/32"]
+    cidr_blocks = [var.host_ip]
   }
   ingress {
     from_port   = 4200

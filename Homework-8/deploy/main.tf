@@ -1,4 +1,3 @@
-
 module "deploy_ec2" {
   source        = "../infra"
   aws_region    = "us-east-1"
@@ -8,11 +7,14 @@ module "deploy_ec2" {
   key_pair_name = "grupo4-key"
   user_data     = file("../infra/user_data.sh")
 
+  eip_tags      = { Name = "group4_eip" }
+
   subnet_id = "subnet-04e972f3a706c00e8"
-  public_ip = true
+  public_ip = false
 
   sg_name        = "group4-sg"
   sg_description = "Allow port 8080 for jenkins, ssh over port 22 only for host ip, port 4200 frontend, port 5432 for postgres"
   vpc_id         = "vpc-031420f7c99b1a0bd"
+  host_ip        = "192.168.0.133/24"
   sg_tags        = { Name = "group4-sg" }
 }
