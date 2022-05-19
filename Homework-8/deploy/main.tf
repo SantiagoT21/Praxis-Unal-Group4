@@ -17,4 +17,16 @@ module "deploy_ec2" {
   vpc_id         = "vpc-031420f7c99b1a0bd"
   host_ip        = "181.130.17.76/32"
   sg_tags        = { Name = "group4-sg" }
+
+  identifier = "group4-rds"
+  allocated_storage = 20
+  engine = "postgres"
+  engine_version = "14.2"
+  instance_class = "db.t3.micro"
+  name = "mypostgres"
+  username = "group4"
+  password = "Perficient2022*"
+  port = 5432
+  skip_final_snapshot = true
+  publicly_accessible = true
 }
