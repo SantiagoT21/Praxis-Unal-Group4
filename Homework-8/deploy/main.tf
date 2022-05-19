@@ -15,6 +15,6 @@ module "deploy_ec2" {
   sg_name        = "group4-sg"
   sg_description = "Allow port 8080 for jenkins, ssh over port 22 only for host ip, port 4200 frontend, port 5432 for postgres"
   vpc_id         = "vpc-031420f7c99b1a0bd"
-  host_ip        = "192.168.0.133/24"
+  host_ip        = "181.130.17.76/32"
   sg_tags        = { Name = "group4-sg" }
 }
