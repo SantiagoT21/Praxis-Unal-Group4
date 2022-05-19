@@ -15,6 +15,13 @@ resource "aws_db_instance" "group4-rds" {
   password             = var.password
 # Port to connect the database instance
   port                 = 5432
+# Skip final snapshot
+  skip_final_snapshot = true
 # Subnet group to connect the database instance
   db_subnet_group_name = aws_db_subnet_group.group4-subnet.name
+# Security groups of the VPC
+  vpc_security_group_ids = [aws_security_group.group4-sg.id]
+
+# Public access
+  publicly_accessible = var.publicly_accessible
 }
