@@ -9,7 +9,7 @@ services:
            - POSTGRES_PASSWORD=secret
     restart: always
   backendserver:
-    image: 'santiagot1105/homework5repo:backend'
+    image: 'santiagot1105/backend-praxis-gildedrose:latest'
     ports:
            - "8081:8080"
     links:
@@ -19,7 +19,7 @@ services:
     environment:
            - DB_HOST_IP=db
   frontend:
-    image: 'santiagot1105/homework5repo:frontend'
+    image: 'santiagot1105/frontend-praxis-gildedrose:latest'
     links:
            - "backendserver"
     depends_on:
