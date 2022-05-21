@@ -15,7 +15,7 @@ pipeline {
                   sh(script:'docker container prune -f')
                   //sh(script:'docker run --name my-postgres -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres')
                   //dataBaseIp = sh(script:'''docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-postgres''', returnStdout: true).trim()
-                  dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=${DB_HOST_IP} --build-arg DB_USERNAME=$d{DB_USERNAME} --build-arg DB_PASSWORD=$d{DB_PASSWORD} .")
+                  dockerImage = docker.build(registry,"--build-arg DB_HOST_IP=${DB_HOST_IP} --build-arg DB_USERNAME=${DB_USERNAME} --build-arg DB_PASSWORD=${DB_PASSWORD} .")
                   //sh(script:'docker container rm my-postgres -f')
               }
           }
