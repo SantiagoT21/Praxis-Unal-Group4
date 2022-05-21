@@ -1,0 +1,11 @@
+pipeline {
+  agent any
+
+  stages {
+      stage('Docker compose Up') {
+          steps {
+              sh 'docker-compose build --pull'
+          }
+      }
+  }
+}
