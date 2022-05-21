@@ -6,10 +6,6 @@ services:
     image: 'santiagot1105/backend-praxis-gildedrose:latest'
     ports:
            - "8081:8080"
-    links:
-           - "db"
-    depends_on:
-           - "db"
     environment:
            - DB_HOST_IP=group4-rds.cqqmj66dxtlw.us-east-1.rds.amazonaws.com
            - DB_USERNAME=group4
