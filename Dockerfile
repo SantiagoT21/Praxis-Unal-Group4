@@ -2,6 +2,8 @@
 FROM maven as backend-b
 COPY . .
 ARG DB_HOST_IP
+ARG DB_USERNAME
+ARG DB_PASSWORD
 RUN mvn -B clean package
 
 # DEPLOY

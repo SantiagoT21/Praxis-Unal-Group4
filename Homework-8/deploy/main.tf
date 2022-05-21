@@ -23,7 +23,7 @@ module "deploy_ec2" {
   engine = "postgres"
   engine_version = "14.2"
   instance_class = "db.t3.micro"
-  name = "mypostgres"
+  name = "my-postgres"
   username = "group4"
   password = "Perficient2022*"
   port = 5432
