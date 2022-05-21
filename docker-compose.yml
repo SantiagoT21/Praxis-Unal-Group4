@@ -1,13 +1,7 @@
 version: '3'
 
 services:
-  db:
-    image: 'postgres'
-    ports:
-           - "5432:5432"
-    environment:
-           - POSTGRES_PASSWORD=secret
-    restart: always
+
   backendserver:
     image: 'santiagot1105/backend-praxis-gildedrose:latest'
     ports:
@@ -17,7 +11,9 @@ services:
     depends_on:
            - "db"
     environment:
-           - DB_HOST_IP=db
+           - DB_HOST_IP=group4-rds.cqqmj66dxtlw.us-east-1.rds.amazonaws.com
+           - DB_USERNAME=group4
+           - DB_PASSWORD=Perficient2022*
   frontend:
     image: 'santiagot1105/frontend-praxis-gildedrose:latest'
     links:
