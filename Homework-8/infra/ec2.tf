@@ -1,4 +1,4 @@
-resource "aws_instance" "group4-ec2" {
+resource "aws_instance" "group4_jenkins_server" {
   ami                         = var.ami_id #ami-005de95e8ff495156
   instance_type               = var.instance_type
   tags                        = var.ec2_tags
