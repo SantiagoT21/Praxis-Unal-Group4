@@ -7,10 +7,5 @@ pipeline {
               sh 'docker-compose build --pull'
           }
       }
-      stage('Docker Run Pull') {
-          steps {
-              sh 'docker-compose run'
-          }
-      }
   }
 }
