@@ -5,7 +5,6 @@ pipeline {
       stage('Docker Build') {
           steps {
               sh 'docker-compose build --pull'
-
               sh 'docker-compose up -d'
           }
       }
