@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   stages {
-      stage('Docker compose Up') {
+      stage('Docker Build') {
           steps {
               sh 'docker-compose build --pull'
 
